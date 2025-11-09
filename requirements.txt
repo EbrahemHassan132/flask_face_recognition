@@ -1,7 +1,7 @@
 Flask==2.1.2
 keras_facenet==0.3.2
 mtcnn==0.1.1
-numpy==1.23.5
+numpy
 opencv_contrib_python==4.8.1.78
 opencv_python==4.8.1.78
 opencv_python_headless==4.6.0.66
