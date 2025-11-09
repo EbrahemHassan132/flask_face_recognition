@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Recognition System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            margin-bottom: 30px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f8f9fa;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            text-align: left;
+        }
+
+        .menu-item:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        .menu-item.active {
+            border-color: #3498db;
+            background: #e3f2fd;
+        }
+
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #3498db;
+            border-radius: 4px;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .checkbox.checked::after {
+            content: "✓";
+            color: white;
+            font-weight: bold;
+        }
+
+        .checkbox.checked {
+            background: #3498db;
+        }
+
+        .menu-text {
+            flex: 1;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .section {
+            display: none;
+            text-align: center;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .back-btn {
+            background: #95a5a6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            font-size: 14px;
+            width: auto;
+        }
+
+        .back-btn:hover {
+            background: #7f8c8d;
+        }
+
+        input[type="text"],
+        input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
+            font-size: 16px;
+            max-width: 100%;
+        }
+
+        .btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: background 0.3s ease;
+            width: auto;
+            min-width: 150px;
+        }
+
+        .btn:hover {
+            background: #2980b9;
+        }
+
+        .btn-success {
+            background: #27ae60;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-warning {
+            background: #f39c12;
+        }
+
+        .btn-warning:hover {
+            background: #e67e22;
+        }
+
+        .btn-info {
+            background: #17a2b8;
+        }
+
+        .btn-info:hover {
+            background: #138496;
+        }
+
+        video,
+        img {
+            max-width: 100%;
+            border-radius: 10px;
+            border: 2px solid #3498db;
+            margin: 15px 0;
+        }
+
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            text-align: center;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .user-list {
+            text-align: left;
+            margin-top: 15px;
+        }
+
+        .user-item {
+            background: white;
+            padding: 12px 15px;
+            margin: 8px 0;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        small {
+            color: #7f8c8d;
+            display: block;
+            margin: 5px 0 15px 0;
+        }
+
+        .stats {
+            background: #e8f4f8;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+
+        .debug-info {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-size: 12px;
+            color: #6c757d;
+            text-align: left;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                font-size: 14px;
+                min-width: 120px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Main Menu -->
+        <div id="mainMenu" class="section active">
+            <h1>Face Recognition</h1>
+            <p class="subtitle">Face ID System</p>
+
+            <div class="stats" id="databaseStats">
+                Loading database info...
+            </div>
+            <div class="debug-info" id="debugInfo" style="display: none;">
+                <strong>Debug Info:</strong><br>
+                <span id="debugDetails">Loading...</span>
+            </div>
+
+            <div class="menu-item" onclick="selectOption('recognizeCamera')">
+                <div class="checkbox" id="checkRecognizeCamera"></div>
+                <div class="menu-text">Recognize (Camera)</div>
+            </div>
+
+            <div class="menu-item" onclick="selectOption('recognizeUpload')">
+                <div class="checkbox" id="checkRecognizeUpload"></div>
+                <div class="menu-text">Recognize (Upload)</div>
+            </div>
+
+            <div class="menu-item" onclick="selectOption('registerCamera')">
+                <div class="checkbox" id="checkRegisterCamera"></div>
+                <div class="menu-text">Register (Camera)</div>
+            </div>
+
+            <div class="menu-item" onclick="selectOption('registerUpload')">
+                <div class="checkbox" id="checkRegisterUpload"></div>
+                <div class="menu-text">Register (Upload)</div>
+            </div>
+
+            <div class="menu-item" onclick="selectOption('manageUsers')">
+                <div class="checkbox" id="checkManageUsers"></div>
+                <div class="menu-text">Manage Users</div>
+            </div>
+            <div style="margin-top: 20px;">
+                <button class="btn btn-warning" onclick="resetDatabase()">Reset Database</button>
+                <button class="btn btn-info" onclick="forceSave()" style="margin-left: 10px;">Force Save</button>
+                <button class="btn" onclick="toggleDebug()" style="margin-left: 10px;">Debug Info</button>
+            </div>
+        </div>
+        <!-- Recognition - Camera -->
+        <div id="recognizeCamera" class="section">
+            <button class="back-btn" onclick="showMainMenu()">← Back to Menu</button>
+            <h2>Face Recognition (Camera)</h2>
+            <video id="videoRecog" autoplay playsinline></video>
+            <br>
+            <button class="btn" id="captureRecog">Capture & Recognize</button>
+            <div id="recogResults" class="results info">
+                Click "Capture & Recognize" to start
+            </div>
+        </div>
+        <!-- Recognition - Upload -->
+        <div id="recognizeUpload" class="section">
+            <button class="back-btn" onclick="showMainMenu()">← Back to Menu</button>
+            <h2>Face Recognition (Upload)</h2>
+            <input type="file" id="fileInputRecog" accept="image/*">
+            <br>
+            <button class="btn" id="uploadRecog">Upload & Recognize</button>
+            <div id="uploadResults" class="results info">
+                Select an image and click "Upload & Recognize"
+            </div>
+        </div>
+        <!-- Registration - Camera -->
+        <div id="registerCamera" class="section">
+            <button class="back-btn" onclick="showMainMenu()">← Back to Menu</button>
+            <h2>Register New User (Camera)</h2>
+            <input type="text" id="regNameCamera" placeholder="Enter full name">
+            <br>
+            <video id="videoReg" autoplay playsinline></video>
+            <br>
+            <button class="btn btn-success" id="captureReg">Capture & Register</button>
+            <div id="regCameraResults" class="results info">
+                Enter name and click "Capture & Register"
+            </div>
+        </div>
+        <!-- Registration - Upload -->
+        <div id="registerUpload" class="section">
+            <button class="back-btn" onclick="showMainMenu()">← Back to Menu</button>
+            <h2>Register New User (Upload)</h2>
+            <input type="text" id="regNameUpload" placeholder="Enter full name">
+            <br>
+            <input type="file" id="fileInputReg" accept="image/*" multiple>
+            <small>💡 Upload multiple images for best results</small>
+            <br>
+            <button class="btn btn-success" id="uploadReg">Upload & Register</button>
+            <div id="regUploadResults" class="results info">
+                Enter name, select images, and click "Upload & Register"
+            </div>
+        </div>
+        <!-- Manage Users -->
+        <div id="manageUsers" class="section">
+            <button class="back-btn" onclick="showMainMenu()">← Back to Menu</button>
+            <h2>Registered Users</h2>
+            <div id="usersList" class="user-list">
+                <div class="results info">Loading users...</div>
+            </div>
+            <button class="btn" onclick="refreshUsers()">Refresh List</button>
+            <div id="manageUsersResults" class="results info">
+                User management panel
+            </div>
+        </div>
+        <!-- Loading Indicator -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Processing...</p>
+        </div>
+    </div>
+    <script>
+        // DOM Elements
+        const sections = {
+            mainMenu: document.getElementById('mainMenu'),
+            recognizeCamera: document.getElementById('recognizeCamera'),
+            recognizeUpload: document.getElementById('recognizeUpload'),
+            registerCamera: document.getElementById('registerCamera'),
+            registerUpload: document.getElementById('registerUpload'),
+            manageUsers: document.getElementById('manageUsers')
+        };
+        const checkboxes = {
+            recognizeCamera: document.getElementById('checkRecognizeCamera'),
+            recognizeUpload: document.getElementById('checkRecognizeUpload'),
+            registerCamera: document.getElementById('checkRegisterCamera'),
+            registerUpload: document.getElementById('checkRegisterUpload'),
+            manageUsers: document.getElementById('checkManageUsers')
+        };
+        const videoRecog = document.getElementById('videoRecog');
+        const videoReg = document.getElementById('videoReg');
+        const loading = document.getElementById('loading');
+        const databaseStats = document.getElementById('databaseStats');
+        const debugInfo = document.getElementById('debugInfo');
+        const debugDetails = document.getElementById('debugDetails');
+        let currentStream = null;
+        let currentSection = 'mainMenu';
+        // Navigation functions
+        function showMainMenu() {
+            Object.values(sections).forEach(section => {
+                section.style.display = 'none';
+                section.classList.remove('active');
+            });
+            sections.mainMenu.style.display = 'block';
+            sections.mainMenu.classList.add('active');
+            currentSection = 'mainMenu';
+
+            // Clear all checkboxes
+            Object.values(checkboxes).forEach(checkbox => {
+                checkbox.classList.remove('checked');
+            });
+
+            updateDatabaseStats();
+            stopCamera();
+        }
+        function selectOption(sectionName) {
+            Object.values(sections).forEach(section => {
+                section.style.display = 'none';
+                section.classList.remove('active');
+            });
+
+            // Update checkbox states
+            Object.values(checkboxes).forEach(checkbox => {
+                checkbox.classList.remove('checked');
+            });
+
+            checkboxes[sectionName].classList.add('checked');
+            sections[sectionName].style.display = 'block';
+            sections[sectionName].classList.add('active');
+            currentSection = sectionName;
+
+            if (sectionName === 'recognizeCamera') {
+                initializeCamera(videoRecog);
+            } else if (sectionName === 'registerCamera') {
+                initializeCamera(videoReg);
+            }
+        }
+        function toggleDebug() {
+            debugInfo.style.display = debugInfo.style.display === 'none' ? 'block' : 'none';
+            if (debugInfo.style.display === 'block') {
+                updateDebugInfo();
+            }
+        }
+        // Database functions
+        async function updateDatabaseStats() {
+            try {
+                const response = await fetch('/users');
+                const data = await response.json();
+                if (data.success) {
+                    databaseStats.innerHTML = `📊 Registered Users: ${data.total_users}`;
+                    databaseStats.className = 'stats success';
+                } else {
+                    databaseStats.innerHTML = `📊 Error: ${data.message}`;
+                    databaseStats.className = 'stats error';
+                }
+            } catch (error) {
+                databaseStats.innerHTML = '📊 Database status: Connection error';
+                databaseStats.className = 'stats error';
+            }
+        }
+        async function updateDebugInfo() {
+            try {
+                const response = await fetch('/users');
+                const data = await response.json();
+                if (data.success) {
+                    debugDetails.innerHTML = `
+                        Users in memory: ${data.total_users}<br>
+                        User list: ${data.users.join(', ') || 'None'}<br>
+                        Last update: ${new Date().toLocaleTimeString()}
+                    `;
+                } else {
+                    debugDetails.innerHTML = `Error: ${data.message}`;
+                }
+            } catch (error) {
+                debugDetails.innerHTML = `Connection error: ${error.message}`;
+            }
+        }
+        async function resetDatabase() {
+            if (!confirm('⚠️ Are you sure you want to reset the entire database? This will delete ALL registered users and cannot be undone!')) {
+                return;
+            }
+            showMessage('databaseStats', 'Resetting database...', 'info');
+
+            try {
+                const response = await fetch('/reset_database', {
+                    method: 'POST'
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage('databaseStats', '✅ Database reset successfully', 'success');
+                    refreshUsers();
+                    updateDebugInfo();
+                } else {
+                    showMessage('databaseStats', `❌ ${data.message}`, 'error');
+                }
+            } catch (error) {
+                showMessage('databaseStats', '❌ Failed to reset database: Network error', 'error');
+            }
+        }
+        async function forceSave() {
+            showMessage('databaseStats', 'Forcing save...', 'info');
+
+            try {
+                const response = await fetch('/debug_save', {
+                    method: 'POST'
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage('databaseStats', `✅ ${data.message}`, 'success');
+                    if (data.users) {
+                        debugDetails.innerHTML += `<br>Saved users: ${data.users.join(', ')}`;
+                    }
+                } else {
+                    showMessage('databaseStats', `❌ ${data.message}`, 'error');
+                }
+            } catch (error) {
+                showMessage('databaseStats', '❌ Failed to force save: Network error', 'error');
+            }
+        }
+        // Camera management
+        async function initializeCamera(videoElement) {
+            stopCamera();
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'user' },
+                    audio: false
+                });
+                videoElement.srcObject = stream;
+                videoElement.play();
+                currentStream = stream;
+
+                // Show success message
+                if (currentSection === 'recognizeCamera') {
+                    showMessage('recogResults', 'Camera ready! Click "Capture & Recognize"', 'info');
+                } else if (currentSection === 'registerCamera') {
+                    showMessage('regCameraResults', 'Camera ready! Enter name and click "Capture & Register"', 'info');
+                }
+            } catch (err) {
+                console.error('Camera error:', err);
+                let errorMessage = 'Error accessing camera. Please ensure you grant permission when the browser prompts. If no prompt appears, check your browser settings for camera access (usually in site settings or privacy settings). Make sure the page is loaded over HTTPS (secure connection). If on mobile, try using a desktop browser or vice versa. Also, ensure no other app is using the camera.';
+                if (err.name === 'NotAllowedError') {
+                    errorMessage += ' Permission was denied. You may need to reset permissions in browser settings.';
+                } else if (err.name === 'NotFoundError') {
+                    errorMessage += ' No camera device found. Check if your device has a camera or if it\'s connected.';
+                }
+                if (currentSection === 'recognizeCamera') {
+                    showMessage('recogResults', errorMessage, 'error');
+                } else if (currentSection === 'registerCamera') {
+                    showMessage('regCameraResults', errorMessage, 'error');
+                }
+            }
+        }
+        function stopCamera() {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+                currentStream = null;
+            }
+        }
+        // Capture image from video
+        function captureFromVideo(videoElement) {
+            const canvas = document.createElement('canvas');
+            canvas.width = videoElement.videoWidth;
+            canvas.height = videoElement.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(videoElement, 0, 0);
+            return new Promise(resolve => {
+                canvas.toBlob(resolve, 'image/jpeg', 0.8);
+            });
+        }
+        // Message display functions
+        function showMessage(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = message;
+            element.className = 'results ' + type;
+        }
+        function showLoadingMessage(elementId) {
+            showMessage(elementId, 'Processing...', 'info');
+        }
+        // API calls
+        async function recognizeFace(imageBlob) {
+            showLoading(true);
+            showLoadingMessage(currentSection === 'recognizeCamera' ? 'recogResults' : 'uploadResults');
+            const formData = new FormData();
+            formData.append('image', imageBlob, 'face.jpg');
+            try {
+                const response = await fetch('/recognize', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    const message = `✅ Recognized: ${data.name}`;
+                    showMessage(currentSection === 'recognizeCamera' ? 'recogResults' : 'uploadResults', message, 'success');
+                } else {
+                    showMessage(currentSection === 'recognizeCamera' ? 'recogResults' : 'uploadResults', `❌ ${data.message}`, 'error');
+                }
+            } catch (error) {
+                showMessage(currentSection === 'recognizeCamera' ? 'recogResults' : 'uploadResults', '❌ Recognition failed: Network error', 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+        async function registerUser(name, imageBlobs) {
+            showLoading(true);
+            showLoadingMessage(currentSection === 'registerCamera' ? 'regCameraResults' : 'regUploadResults');
+            const formData = new FormData();
+            formData.append('name', name);
+
+            imageBlobs.forEach((blob, index) => {
+                formData.append('image', blob, `face_${index}.jpg`);
+            });
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    const message = `✅ ${data.message}`;
+                    showMessage(currentSection === 'registerCamera' ? 'regCameraResults' : 'regUploadResults', message, 'success');
+
+                    // Clear form and update stats
+                    if (currentSection === 'registerCamera') {
+                        document.getElementById('regNameCamera').value = '';
+                    } else {
+                        document.getElementById('regNameUpload').value = '';
+                        document.getElementById('fileInputReg').value = '';
+                    }
+
+                    updateDatabaseStats();
+                    updateDebugInfo();
+                } else {
+                    showMessage(currentSection === 'registerCamera' ? 'regCameraResults' : 'regUploadResults', `❌ ${data.message}`, 'error');
+                }
+            } catch (error) {
+                showMessage(currentSection === 'registerCamera' ? 'regCameraResults' : 'regUploadResults', '❌ Registration failed: Network error', 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+        async function loadUsers() {
+            try {
+                const response = await fetch('/users');
+                const data = await response.json();
+
+                const usersList = document.getElementById('usersList');
+                if (data.success && data.users.length > 0) {
+                    usersList.innerHTML = data.users.map(user => `
+                        <div class="user-item">
+                            <span>👤 ${user}</span>
+                            <button class="btn btn-danger" onclick="deleteUser('${user}')">Delete</button>
+                        </div>
+                    `).join('');
+                    showMessage('manageUsersResults', `Found ${data.total_users} registered users`, 'success');
+                } else {
+                    usersList.innerHTML = '<div class="results info">No users registered yet</div>';
+                    showMessage('manageUsersResults', 'No users registered yet', 'info');
+                }
+            } catch (error) {
+                console.error('Failed to load users:', error);
+                showMessage('manageUsersResults', '❌ Failed to load users', 'error');
+            }
+        }
+        function showLoading(show) {
+            loading.style.display = show ? 'block' : 'none';
+        }
+        async function deleteUser(name) {
+            if (!confirm(`Are you sure you want to delete user "${name}"?`)) return;
+
+            showMessage('manageUsersResults', 'Deleting user...', 'info');
+
+            try {
+                const response = await fetch(`/user/${encodeURIComponent(name)}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage('manageUsersResults', `✅ ${data.message}`, 'success');
+                    refreshUsers();
+                    updateDatabaseStats();
+                    updateDebugInfo();
+                } else {
+                    showMessage('manageUsersResults', `❌ ${data.message}`, 'error');
+                }
+            } catch (error) {
+                showMessage('manageUsersResults', '❌ Failed to delete user: Network error', 'error');
+            }
+        }
+        function refreshUsers() {
+            showMessage('manageUsersResults', 'Refreshing user list...', 'info');
+            loadUsers();
+        }
+        // Event listeners
+        document.getElementById('captureRecog').addEventListener('click', async () => {
+            const blob = await captureFromVideo(videoRecog);
+            await recognizeFace(blob);
+        });
+        document.getElementById('uploadRecog').addEventListener('click', async () => {
+            const fileInput = document.getElementById('fileInputRecog');
+            if (!fileInput.files[0]) {
+                showMessage('uploadResults', '❌ Please select an image first', 'error');
+                return;
+            }
+            await recognizeFace(fileInput.files[0]);
+        });
+        document.getElementById('captureReg').addEventListener('click', async () => {
+            const name = document.getElementById('regNameCamera').value.trim();
+            if (!name) {
+                showMessage('regCameraResults', '❌ Please enter your name first', 'error');
+                return;
+            }
+            const blob = await captureFromVideo(videoReg);
+            await registerUser(name, [blob]);
+        });
+        document.getElementById('uploadReg').addEventListener('click', async () => {
+            const name = document.getElementById('regNameUpload').value.trim();
+            const fileInput = document.getElementById('fileInputReg');
+
+            if (!name) {
+                showMessage('regUploadResults', '❌ Please enter your name first', 'error');
+                return;
+            }
+            if (!fileInput.files.length) {
+                showMessage('regUploadResults', '❌ Please select at least one image', 'error');
+                return;
+            }
+            const blobs = Array.from(fileInput.files);
+            await registerUser(name, blobs);
+        });
+        // Initialize
+        showMainMenu();
+        loadUsers();
+        updateDatabaseStats();
+        // Clean up on page unload
+        window.addEventListener('beforeunload', stopCamera);
+    </script>
+</body>
+
+</html>

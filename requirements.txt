@@ -1,0 +1,5 @@
+flask
+opencv-python-headless  # Headless for server (no GUI)
+numpy
+keras-facenet
+mtcnn
